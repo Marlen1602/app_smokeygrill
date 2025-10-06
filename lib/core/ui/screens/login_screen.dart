@@ -174,7 +174,6 @@ Future<void> _handleLogin(BuildContext context) async {
     required TextEditingController controller,
     required String label,
     required String hint,
-    bool obscureText = false,
     bool isPassword = false,
   }) {
     return Column(
