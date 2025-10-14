@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import '../data/services/auth_service.dart';
 
 class AuthViewModel extends ChangeNotifier {
-  final AuthService _authService = AuthService();
+  final AuthService _authService;
+  //  Constructor con inyección opcional del servicio
+    AuthViewModel({AuthService? authService})
+    : _authService = authService ?? AuthService();
 
   bool _isLoggedIn = false;
   String? _username;
@@ -10,6 +13,8 @@ class AuthViewModel extends ChangeNotifier {
   int? _userId;
   int? _tipoUsuarioId;
   String? _token;
+
+  String get nombreUsuario => _username ?? "Usuario";
 
   bool get isLoggedIn => _isLoggedIn;
   String? get username => _username;
@@ -20,7 +25,7 @@ class AuthViewModel extends ChangeNotifier {
 
 Future<void> login(String user, String pass) async {
   final result = await _authService.login(user, pass);
-
+  
   // Verificamos si el tipo de usuario es 3 (empleado)
   if (result["tipoUsuarioId"] != 3) {
     throw Exception("Acceso restringido: solo empleados pueden iniciar sesión");
@@ -37,9 +42,9 @@ Future<void> login(String user, String pass) async {
   notifyListeners();
 }
 
-  void logout() {
-    _resetUser();
-  }
+  Future<void> logout() async {
+  _resetUser();
+}
 
   void _resetUser() {
     _isLoggedIn = false;

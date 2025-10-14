@@ -12,15 +12,12 @@ class AuthService {
       url,
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
-        "identificador": user,   // si tu backend pide username
-        "password": pass,         // si pide email cámbialo a "email"
+        "identificador": user,   
+        "password": pass,         
       }),
     );
 
-    // Debug para ver qué devuelve
-    print("🔹 Login request → ${response.body}");
-    print("🔹 Status Code → ${response.statusCode}");
-
+   
     if (response.statusCode == 200) {
       // Si la respuesta es correcta, regresamos el JSON
       return jsonDecode(response.body);
