@@ -7,7 +7,7 @@ class Producto {
   final String descripcion;
   final double precio;
   final bool disponible;
-  final String imagen; // ✅ corregido: nombre en minúscula
+  final String imagen; 
   int cantidad;
 
   Producto({
@@ -16,7 +16,7 @@ class Producto {
     required this.descripcion,
     required this.precio,
     required this.disponible,
-    required this.imagen, // ✅ corregido
+    required this.imagen, 
     this.cantidad = 1,
   });
 
@@ -27,7 +27,7 @@ class Producto {
       descripcion: json['Descripcion'] ?? '',
       precio: double.tryParse(json['Precio'].toString()) ?? 0.0,
       disponible: json['Disponible'] ?? true,
-      imagen: json['Imagen'] ?? '', // ✅ corregido
+      imagen: json['Imagen'] ?? '', 
     );
   }
 
@@ -136,7 +136,7 @@ class PedidoViewModel extends ChangeNotifier {
                 descripcion: p.nota ?? '',
                 precio: p.precio,
                 disponible: true,
-                imagen: p.imagen ?? '', // ✅ ahora se muestra correctamente
+                imagen: p.imagen ?? '', 
                 cantidad: p.cantidad,
               );
             }).toList(),
@@ -158,7 +158,7 @@ class PedidoViewModel extends ChangeNotifier {
                 descripcion: d.nota ?? '',
                 precio: d.precio,
                 disponible: true,
-                imagen: d.imagen ?? '', // ✅ ahora se muestra correctamente
+                imagen: d.imagen ?? '', 
                 cantidad: d.cantidad,
               );
             }).toList(),
