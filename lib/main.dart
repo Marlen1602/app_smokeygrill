@@ -6,6 +6,7 @@ import 'core/theme/app_theme.dart';
 import 'core/router.dart';
 import 'viewmodels/auth_viewmodel.dart';
 import 'viewmodels/orders_viewmodel.dart';
+import 'viewmodels/pedido_viewmodel.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +19,7 @@ Future<void> main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
         ChangeNotifierProvider(create: (_) => OrdersViewModel()),
+        ChangeNotifierProvider(create: (_) => PedidoViewModel()),
       ],
       child: const MyApp(),
     ),

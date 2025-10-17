@@ -19,8 +19,8 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
       Provider.of<OrdersViewModel>(context, listen: false).loadPedidos();
     });
   }
-  //Modal para configuracion de cuentas 
- void _mostrarConfiguracionCuentas(BuildContext context) {
+// ===== Modal para configuración de cuentas =====
+void _mostrarConfiguracionCuentas(BuildContext context) {
   showDialog(
     context: context,
     barrierDismissible: true,
@@ -38,8 +38,8 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: const [
+                  const Row(
+                    children: [
                       Icon(Icons.groups_2, color: Color(0xFFFF6B00)),
                       SizedBox(width: 8),
                       Text(
@@ -79,11 +79,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    Navigator.pushNamed(
-                      context,
-                      '/registrarPedido',
-                      arguments: {'tipoCuenta': 'separada'},
-                    );
+                    _mostrarNumeroCuentas(context); // 👈 nuevo modal
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF6B00),
@@ -133,8 +129,8 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                     Navigator.pop(context);
                     Navigator.pushNamed(
                       context,
-                      '/registrarPedido',
-                      arguments: {'tipoCuenta': 'unica'},
+                      '/menu',
+                      arguments: {'tipoCuenta': 'unica', 'numeroCuentas': 1},
                     );
                   },
                   style: OutlinedButton.styleFrom(
@@ -177,6 +173,135 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
             ],
           ),
         ),
+      );
+    },
+  );
+}
+
+// ===== Segundo modal: número de cuentas =====
+void _mostrarNumeroCuentas(BuildContext context) {
+  final TextEditingController cuentasController = TextEditingController(text: "2");
+  int numeroCuentas = 2;
+  bool esValido = true;
+
+  showDialog(
+    context: context,
+    barrierDismissible: true,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return Dialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.settings, color: Color(0xFFFF6B00)),
+                      SizedBox(width: 8),
+                      Text("Número de Cuentas",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18)),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "¿En cuántas cuentas separadas desea dividir el pedido?",
+                    style: TextStyle(color: Colors.black54, fontSize: 14),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: cuentasController,
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      setState(() {
+                        numeroCuentas = int.tryParse(value) ?? 0;
+                        esValido = numeroCuentas >= 2 && numeroCuentas <= 10;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: esValido ? Colors.grey : Colors.red,
+                            width: esValido ? 1 : 2,
+                          )),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: esValido ? Colors.grey : Colors.red,
+                            width: esValido ? 1 : 2,
+                          )),
+                      focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: esValido ? const Color(0xFFFF6B00) : Colors.red,
+                            width: 2,
+                          )),
+                      suffixIcon:
+                          const Icon(Icons.numbers, color: Color(0xFFFF6B00)),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    esValido 
+                        ? "Mínimo 2, máximo 10 cuentas"
+                        : "Por favor ingrese un número entre 2 y 10",
+                    style: TextStyle(
+                      color: esValido ? Colors.grey : Colors.red,
+                      fontSize: 12,
+                      fontWeight: esValido ? FontWeight.normal : FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  if (esValido)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8F5E9),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFF4CAF50)),
+                      ),
+                      child: Text(
+                        "Se crearán $numeroCuentas cuentas separadas:\n${List.generate(numeroCuentas, (i) => "• Cuenta ${i + 1}").join("\n")}",
+                        style: const TextStyle(color: Color(0xFF2E7D32)),
+                      ),
+                    ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Cancelar"),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: esValido 
+                              ? const Color(0xFFFF6B00)
+                              : Colors.grey,
+                        ),
+                        onPressed: esValido ? () {
+                          Navigator.pop(context);
+                          Navigator.pushNamed(context, '/menu', arguments: {
+                            'tipoCuenta': 'separada',
+                            'numeroCuentas': numeroCuentas,
+                          });
+                        } : null,
+                        child: const Text("Confirmar"),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       );
     },
   );
@@ -319,8 +444,16 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
     );
   }
 
-    Widget _buildCard(Order o, Color color) {
-    return Card(
+Widget _buildCard(Order o, Color color) {
+  return InkWell(
+    onTap: () {
+      Navigator.pushNamed(
+        context,
+        '/detallePedido',
+        arguments: o, // ✅ se pasa el objeto Order
+      );
+    },
+    child: Card(
       elevation: 0.8,
       color: Colors.white,
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -330,7 +463,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ===== ENCABEZADO =====
+            // 🔹 Encabezado
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -339,7 +472,17 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                 Row(
                   children: [
                     OutlinedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/menu',
+                          arguments: {
+                            'pedidoExistente': o, // 👈 se envía el pedido actual
+                            'tipoCuenta': o.tipoCuenta,
+                            'numeroCuentas': o.cuentas?.length ?? 1,
+                          },
+                        );
+                      },
                       icon: const Icon(Icons.add, size: 16),
                       label: const Text("Agregar más"),
                       style: OutlinedButton.styleFrom(
@@ -349,8 +492,8 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                     ),
                     const SizedBox(width: 6),
                     Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
                         color: color.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
@@ -371,7 +514,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
 
             const SizedBox(height: 8),
 
-            // ===== HORA Y MESA =====
+            // 🔹 Hora y mesa
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -391,56 +534,26 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
 
             const SizedBox(height: 8),
 
-            // ===== PRODUCTOS =====
-            if (o.tipoCuenta == "separada") ...[
-              // 👉 Mostrar por cuentas
-              for (var cuenta in o.cuentas) ...[
-                Text(
-                  "Cuenta ${cuenta.numeroCuenta}",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade700,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                for (var d in cuenta.productos)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 3),
-                    child: Text(
-                      "${d.cantidad}x ${d.nombre}"
-                      "${d.nota != null && d.nota!.isNotEmpty ? ' (${d.nota})' : ''}",
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                  ),
-                const Divider(height: 10, color: Colors.grey),
-              ],
-            ] else ...[
-              // 👉 Pedido normal
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: o.detalles.map((d) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 3),
-                    child: Text(
-                      "${d.cantidad}x ${d.nombre}"
-                      "${d.nota != null && d.nota!.isNotEmpty ? ' (${d.nota})' : ''}",
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ],
+            // 🔹 Productos
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: o.detalles.map((d) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 3),
+                  child: Text("${d.cantidad}x ${d.nombre}"),
+                );
+              }).toList(),
+            ),
 
             const SizedBox(height: 8),
-
-            // ===== TOTAL =====
-            Text(
-              "\$${o.total.toStringAsFixed(2)}",
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-            ),
+            Text("\$${o.total.toStringAsFixed(2)}",
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 }

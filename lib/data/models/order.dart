@@ -24,17 +24,14 @@ class Order {
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
-    // ---- Detalles normales ----
     List<dynamic> detallesJson = [];
     if (json['detalle_pedido'] != null && json['detalle_pedido'] is List) {
       detallesJson = json['detalle_pedido'];
     }
 
-    // ---- Cuentas separadas ----
     List<dynamic> cuentasJson = [];
     if (json['cuentas'] != null && json['cuentas'] is List) {
       cuentasJson = json['cuentas'];
-      // También agregamos productos de las cuentas al mismo nivel para visualización general
       for (var cuenta in cuentasJson) {
         if (cuenta['productos'] != null && cuenta['productos'] is List) {
           detallesJson.addAll(cuenta['productos']);
@@ -44,8 +41,8 @@ class Order {
 
     return Order(
       id: json['id'] ?? 0,
-      estado: json['estado'] ?? '',
-      total: (json['total'] as num?)?.toDouble() ?? 0,
+      estado: json['estado'] ?? 'En preparación',
+      total: (json['total'] as num?)?.toDouble() ?? 0.0,
       fecha: json['fecha'] ?? '',
       cliente: json['clienteNombre'] ?? 'Desconocido',
       telefono: json['clienteTelefono'] ?? '',
@@ -58,6 +55,7 @@ class Order {
 }
 
 class DetallePedido {
+  final int id; // 👈 agregado
   final String nombre;
   final int cantidad;
   final String imagen;
@@ -65,6 +63,7 @@ class DetallePedido {
   final String? nota;
 
   DetallePedido({
+    required this.id,
     required this.nombre,
     required this.cantidad,
     required this.imagen,
@@ -75,10 +74,11 @@ class DetallePedido {
   factory DetallePedido.fromJson(Map<String, dynamic> json) {
     final producto = json['productos'] ?? json;
     return DetallePedido(
+      id: producto['ID_Producto'] ?? 0, // 👈 agregado para compatibilidad
       nombre: producto['Nombre'] ?? producto['nombre'] ?? 'Producto sin nombre',
       cantidad: json['cantidad'] ?? 0,
       imagen: producto['Imagen'] ?? producto['imagen'] ?? '',
-      precio: double.tryParse(producto['Precio']?.toString() ?? '0') ?? 0,
+      precio: double.tryParse(producto['Precio']?.toString() ?? '0') ?? 0.0,
       nota: json['nota'],
     );
   }
@@ -98,7 +98,7 @@ class CuentaSeparada {
   factory CuentaSeparada.fromJson(Map<String, dynamic> json) {
     return CuentaSeparada(
       id: json['id'] ?? 0,
-      numeroCuenta: json['numeroCuenta'] ?? 0,
+      numeroCuenta: json['numeroCuenta'] ?? 1,
       productos: (json['productos'] as List<dynamic>? ?? [])
           .map((p) => DetallePedido.fromJson(p))
           .toList(),
