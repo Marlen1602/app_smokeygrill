@@ -477,7 +477,7 @@ Widget _buildCard(Order o, Color color) {
                           context,
                           '/menu',
                           arguments: {
-                            'pedidoExistente': o, // 👈 se envía el pedido actual
+                            'pedidoExistente': o, 
                             'tipoCuenta': o.tipoCuenta,
                             'numeroCuentas': o.cuentas?.length ?? 1,
                           },

@@ -158,7 +158,7 @@ class PedidoViewModel extends ChangeNotifier {
                 descripcion: d.nota ?? '',
                 precio: d.precio,
                 disponible: true,
-                imagen: d.imagen ?? '', 
+                imagen: d.imagen ??  '', 
                 cantidad: d.cantidad,
               );
             }).toList(),
