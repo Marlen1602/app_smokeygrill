@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../viewmodels/pedido_viewmodel.dart';
 import '../widgets/producto_card.dart';
+import '../../../data/models/producto.dart';
 
 class CuentaTab extends StatelessWidget {
   final int cuentaIndex;
