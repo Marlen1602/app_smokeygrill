@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../viewmodels/auth_viewmodel.dart';
+import 'package:flutter/services.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,7 +19,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+    canPop: false,
+    onPopInvokedWithResult: (bool didPop, Object? result) {
+      if (!didPop) {
+        SystemNavigator.pop();
+      }
+    },
+    child:  Scaffold(
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -126,6 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
+     )
     );
   }
 
