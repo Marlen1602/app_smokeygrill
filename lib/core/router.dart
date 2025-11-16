@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/ui/screens/login_screen.dart';
 import '../core/ui/screens/active_orders_screen.dart';
 import '../core/ui/screens/pedido_screen.dart';
+import '../core/ui/screens/menu_screen.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/pedido_viewmodel.dart';
 
@@ -38,7 +39,9 @@ class AppRouter {
             pedido: pedido,
           ),
         );
-
+      // 🔹 Pantalla de menú
+      case '/menu':
+        return MaterialPageRoute(builder: (_) => const MenuScreen());
       // 🔹 Ruta por defecto
       default:
         return MaterialPageRoute(

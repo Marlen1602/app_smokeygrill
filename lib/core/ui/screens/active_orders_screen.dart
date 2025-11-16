@@ -3,6 +3,10 @@ import 'package:provider/provider.dart';
 import '../../../viewmodels/orders_viewmodel.dart';
 import '../../../viewmodels/auth_viewmodel.dart';
 import '../../../data/models/order.dart';
+import '../../../viewmodels/pedido_viewmodel.dart';
+import '../screens/menu_screen.dart';
+import '../screens/pedido_screen.dart';
+import 'package:flutter/services.dart';
 
 class ActiveOrdersScreen extends StatefulWidget {
   const ActiveOrdersScreen({super.key});
@@ -79,7 +83,7 @@ void _mostrarConfiguracionCuentas(BuildContext context) {
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    _mostrarNumeroCuentas(context); // 👈 nuevo modal
+                    _mostrarNumeroCuentas(context); 
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF6B00),
@@ -280,21 +284,30 @@ void _mostrarNumeroCuentas(BuildContext context) {
                         onPressed: () => Navigator.pop(context),
                         child: const Text("Cancelar"),
                       ),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: esValido 
-                              ? const Color(0xFFFF6B00)
-                              : Colors.grey,
-                        ),
-                        onPressed: esValido ? () {
-                          Navigator.pop(context);
-                          Navigator.pushNamed(context, '/menu', arguments: {
-                            'tipoCuenta': 'separada',
-                            'numeroCuentas': numeroCuentas,
-                          });
-                        } : null,
-                        child: const Text("Confirmar"),
-                      ),
+                     ElevatedButton(
+  style: ElevatedButton.styleFrom(
+    backgroundColor: esValido ? const Color(0xFFFF6B00) : Colors.grey,
+  ),
+                      onPressed: esValido
+                          ? () {
+                              Navigator.pop(context);
+
+                              // 🔹 Obtener el ViewModel y configurar las cuentas
+                              final pedidoVM = Provider.of<PedidoViewModel>(context, listen: false);
+                              pedidoVM.configurarCuentasSeparadas(numeroCuentas);
+
+                              // 🔹 Ir al menú con el flag activado
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const MenuScreen(cuentasSeparadas: true),
+                                ),
+                              );
+                            }
+                          : null,
+                      child: const Text("Confirmar"),
+                    ),
+
                     ],
                   ),
                 ],
@@ -316,9 +329,15 @@ void _mostrarNumeroCuentas(BuildContext context) {
     final preparando = ordersVM.getPedidosPorEstado("preparación");
     final listo = ordersVM.getPedidosPorEstado("Listo");
     final entregado = ordersVM.getPedidosPorEstado("Entregado");
+     return PopScope(
+    canPop: false,
+    onPopInvokedWithResult: (bool didPop, Object? result) {
+      if (!didPop) {
+        SystemNavigator.pop();
+      }
+    },
 
-
-    return Scaffold(
+    child:  Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
@@ -408,6 +427,7 @@ void _mostrarNumeroCuentas(BuildContext context) {
           size: 30,                               
         ),
       ),
+     )
     );
   }
 
@@ -447,12 +467,19 @@ void _mostrarNumeroCuentas(BuildContext context) {
 Widget _buildCard(Order o, Color color) {
   return InkWell(
     onTap: () {
-      Navigator.pushNamed(
-        context,
-        '/detallePedido',
-        arguments: o, // ✅ se pasa el objeto Order
-      );
-    },
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ChangeNotifierProvider(
+              create: (_) => PedidoViewModel()
+                ..cargarDesdePedidoExistente(o)
+                ..activarModoLectura(true),
+              child: const PedidoScreen(esNuevo: false),
+            ),
+          ),
+        );
+      },
+
     child: Card(
       elevation: 0.8,
       color: Colors.white,
@@ -471,18 +498,32 @@ Widget _buildCard(Order o, Color color) {
                     style: const TextStyle(fontWeight: FontWeight.bold)),
                 Row(
                   children: [
-                    OutlinedButton.icon(
+                   OutlinedButton.icon(
                       onPressed: () {
-                        Navigator.pushNamed(
+                       final pedidoVM = Provider.of<PedidoViewModel>(context, listen: false);
+
+                        // 1) Cargar el pedido completo desde el backend en el ViewModel
+                        pedidoVM.cargarDesdePedidoExistente(o);
+
+                        // 2) Vaciar solo los productos, pero conservar las cuentas y sus ids
+                        pedidoVM.limpiarSoloCarrito();
+
+                        // 3) Activar modo agregar
+                        pedidoVM.activarModoAgregar(true);
+                        pedidoVM.activarModoLectura(false);
+
+                        // 4) Navegar al menú usando el mismo PedidoViewModel global
+                        Navigator.push(
                           context,
-                          '/menu',
-                          arguments: {
-                            'pedidoExistente': o, 
-                            'tipoCuenta': o.tipoCuenta,
-                            'numeroCuentas': o.cuentas?.length ?? 1,
-                          },
+                          MaterialPageRoute(
+                            builder: (_) => MenuScreen(
+                              cuentasSeparadas: o.tipoCuenta == "separada",
+                              pedidoExistente: o,
+                            ),
+                          ),
                         );
-                      },
+                    },
+
                       icon: const Icon(Icons.add, size: 16),
                       label: const Text("Agregar más"),
                       style: OutlinedButton.styleFrom(
@@ -490,6 +531,7 @@ Widget _buildCard(Order o, Color color) {
                         side: BorderSide(color: color),
                       ),
                     ),
+
                     const SizedBox(width: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -534,21 +576,49 @@ Widget _buildCard(Order o, Color color) {
 
             const SizedBox(height: 8),
 
-            // 🔹 Productos
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: o.detalles.map((d) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 3),
-                  child: Text("${d.cantidad}x ${d.nombre}"),
-                );
-              }).toList(),
-            ),
+Builder(
+  builder: (_) {
+    // Agrupar productos por nombre y sumar cantidades
+    final Map<String, int> agrupados = {};
+    double total = 0;
 
-            const SizedBox(height: 8),
-            Text("\$${o.total.toStringAsFixed(2)}",
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+    for (var d in o.detalles) {
+      final nombre = d.nombre ?? "Producto sin nombre";
+      final cantidad = d.cantidad ?? 1;
+      final precio = d.precio ?? 0.0;
+
+      agrupados[nombre] = (agrupados[nombre] ?? 0) + cantidad;
+      total += precio * cantidad;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 🔸 Lista agrupada
+        ...agrupados.entries.map((e) => Padding(
+              padding: const EdgeInsets.only(bottom: 3),
+              child: Text(
+                "${e.value}x ${e.key}",
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black87,
+                ),
+              ),
+            )),
+        const SizedBox(height: 6),
+        // 🔸 Total actualizado
+              Text(
+                "\$${total.toStringAsFixed(2)}",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: Color(0xFF4CAF50),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
           ],
         ),
       ),

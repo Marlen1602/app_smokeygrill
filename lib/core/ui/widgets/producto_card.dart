@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../viewmodels/pedido_viewmodel.dart';
+import '../../../data/models/producto.dart';
+
 
 class ProductoCard extends StatelessWidget {
   final Producto producto;

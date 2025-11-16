@@ -7,19 +7,28 @@ import 'core/router.dart';
 import 'viewmodels/auth_viewmodel.dart';
 import 'viewmodels/orders_viewmodel.dart';
 import 'viewmodels/pedido_viewmodel.dart';
+import 'viewmodels/menu_viewmodel.dart';
+
+//Crear instancias globales (se mantienen en memoria)
+final menuViewModel = MenuViewModel();
+final pedidoViewModel = PedidoViewModel();
+final authViewModel = AuthViewModel();
+final ordersViewModel = OrdersViewModel();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // 🔹 Cargar variables de entorno (.env)
   await dotenv.load(fileName: "assets/config/.env");
-  print("🌍 API_URL = ${dotenv.env['API_URL']}");
+  print("API_URL = ${dotenv.env['API_URL']}");
+ 
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthViewModel()),
-        ChangeNotifierProvider(create: (_) => OrdersViewModel()),
-        ChangeNotifierProvider(create: (_) => PedidoViewModel()),
+        ChangeNotifierProvider.value(value: authViewModel),
+        ChangeNotifierProvider.value(value: ordersViewModel),
+        ChangeNotifierProvider.value(value: pedidoViewModel),
+        ChangeNotifierProvider.value(value: menuViewModel), 
       ],
       child: const MyApp(),
     ),

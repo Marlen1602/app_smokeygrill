@@ -38,19 +38,50 @@ class Order {
         }
       }
     }
+    
+        return Order(
+        id: json['id'] ?? 0,
+        estado: json['estado'] ?? 'En preparación',
+        total: (json['total'] as num?)?.toDouble() ?? 0.0,
+        fecha: json['fecha'] ?? '',
+        cliente: json['clienteNombre'] ?? 'Desconocido',
+        telefono: json['clienteTelefono'] ?? '',
+        mesa: (() {
+          final mesaCampo = json['mesa'] ?? json['Mesa'];
+          final direccion = json['direccionEnvio'] ??
+              json['DireccionEnvio'] ??
+              json['DIRECCION_ENVIO'];
 
-    return Order(
-      id: json['id'] ?? 0,
-      estado: json['estado'] ?? 'En preparación',
-      total: (json['total'] as num?)?.toDouble() ?? 0.0,
-      fecha: json['fecha'] ?? '',
-      cliente: json['clienteNombre'] ?? 'Desconocido',
-      telefono: json['clienteTelefono'] ?? '',
-      mesa: json['direccionEnvio'] ?? 'Sin mesa',
-      tipoCuenta: json['tipoCuenta'] ?? 'unica',
-      detalles: detallesJson.map((d) => DetallePedido.fromJson(d)).toList(),
-      cuentas: cuentasJson.map((c) => CuentaSeparada.fromJson(c)).toList(),
-    );
+          String resultado = "No asignada";
+
+  // 🟢 1. Si viene "mesa" con un valor válido
+          if (mesaCampo != null && mesaCampo.toString().trim().isNotEmpty) {
+            final texto = mesaCampo.toString().trim();
+            if (RegExp(r'^\d+$').hasMatch(texto)) {
+              resultado = "Mesa $texto";
+            } else {
+              resultado = texto;
+            }
+          }
+
+  // 🟢 2. Si viene en "direccionEnvio" (caso de tus pedidos)
+        else if (direccion != null && direccion.toString().trim().isNotEmpty) {
+          final texto = direccion.toString().trim();
+          if (RegExp(r'^\d+$').hasMatch(texto)) {
+            resultado = "Mesa $texto";
+          } else if (!texto.toLowerCase().contains("mesa")) {
+            resultado = "Mesa $texto";
+          } else {
+            resultado = texto;
+          }
+        }
+        return resultado;
+      })(),
+
+        tipoCuenta: json['tipoCuenta'] ?? 'unica',
+        detalles: detallesJson.map((d) => DetallePedido.fromJson(d)).toList(),
+        cuentas: cuentasJson.map((c) => CuentaSeparada.fromJson(c)).toList(),
+      );
   }
 }
 

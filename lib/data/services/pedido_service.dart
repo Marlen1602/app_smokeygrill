@@ -36,7 +36,7 @@ class PedidoService {
       final response = await http.put(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'nuevoEstado': nuevoEstado}), // 👈 igual que en backend
+        body: jsonEncode({'nuevoEstado': nuevoEstado}), // igual que en backend
       );
 
       if (response.statusCode == 200) {
@@ -50,4 +50,51 @@ class PedidoService {
       rethrow;
     }
   }
+
+Future<void> agregarProductosPedido({
+  required int pedidoId,
+  required List<Map<String, dynamic>> productos,
+  int? cuentaId, 
+}) async {
+
+  try {
+    // 🔹 Filtrar solo productos nuevos (sin idDetalle o id en backend)
+    final nuevosProductos = productos.where((p) {
+      // Si viene de backend, tendrá un campo 'idDetalle' o 'detalleId' o similar
+      return p["idDetalle"] == null && p["detalleId"] == null;
+    }).toList();
+
+    if (nuevosProductos.isEmpty) {
+      print("⚠️ No hay productos nuevos para agregar al pedido $pedidoId");
+      return;
+    }
+
+   final body = {
+  "pedidoId": pedidoId,
+  "productos": nuevosProductos,
+};
+
+if (cuentaId != null) {
+  body["cuentaId"] = cuentaId; // solo si tiene valor real
+}
+
+
+    final response = await http.post(
+      Uri.parse("$baseUrl/pedidos/agregar-productos"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode != 201) {
+      print("❌ Error al agregar productos: ${response.body}");
+      throw Exception("Error al agregar productos");
+    }
+
+    print("✅ Se agregaron ${nuevosProductos.length} productos nuevos al pedido $pedidoId");
+  } catch (e) {
+    print("🚨 Error al agregar productos: $e");
+    rethrow;
+  }
+}
+
 }
