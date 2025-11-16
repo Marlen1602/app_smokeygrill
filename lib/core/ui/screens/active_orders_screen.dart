@@ -576,8 +576,6 @@ Widget _buildCard(Order o, Color color) {
 
             const SizedBox(height: 8),
 
-            // 🔹 Productos
-            // 🔹 Productos agrupados y total actualizado
 Builder(
   builder: (_) {
     // Agrupar productos por nombre y sumar cantidades
