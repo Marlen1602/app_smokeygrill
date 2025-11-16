@@ -4,7 +4,6 @@ import '../../../viewmodels/menu_viewmodel.dart';
 import '../../../viewmodels/pedido_viewmodel.dart';
 import '../../../data/models/producto.dart';
 import '../../ui/screens/pedido_screen.dart';
-import '../../../data/services/pedido_service.dart';
 
 class MenuScreen extends StatefulWidget {
   final bool cuentasSeparadas;

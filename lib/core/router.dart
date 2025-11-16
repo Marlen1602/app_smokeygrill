@@ -5,7 +5,6 @@ import '../core/ui/screens/pedido_screen.dart';
 import '../core/ui/screens/menu_screen.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/pedido_viewmodel.dart';
-import '../viewmodels/menu_viewmodel.dart';
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
