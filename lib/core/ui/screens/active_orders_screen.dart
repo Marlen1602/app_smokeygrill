@@ -6,7 +6,7 @@ import '../../../data/models/order.dart';
 import '../../../viewmodels/pedido_viewmodel.dart';
 import '../screens/menu_screen.dart';
 import '../screens/pedido_screen.dart';
-import '../../../data/models/producto.dart';
+import 'package:flutter/services.dart';
 
 class ActiveOrdersScreen extends StatefulWidget {
   const ActiveOrdersScreen({super.key});
@@ -83,7 +83,7 @@ void _mostrarConfiguracionCuentas(BuildContext context) {
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    _mostrarNumeroCuentas(context); // 👈 nuevo modal
+                    _mostrarNumeroCuentas(context); 
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF6B00),
@@ -329,9 +329,15 @@ void _mostrarNumeroCuentas(BuildContext context) {
     final preparando = ordersVM.getPedidosPorEstado("preparación");
     final listo = ordersVM.getPedidosPorEstado("Listo");
     final entregado = ordersVM.getPedidosPorEstado("Entregado");
+     return PopScope(
+    canPop: false,
+    onPopInvokedWithResult: (bool didPop, Object? result) {
+      if (!didPop) {
+        SystemNavigator.pop();
+      }
+    },
 
-
-    return Scaffold(
+    child:  Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
@@ -421,6 +427,7 @@ void _mostrarNumeroCuentas(BuildContext context) {
           size: 30,                               
         ),
       ),
+     )
     );
   }
 
